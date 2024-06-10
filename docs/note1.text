@@ -1,0 +1,20 @@
+***** Morgan *****
+-> npm install morgan
+-> Thư viện in ra các log khi người dụng chạy server
+-> Run node --watch sever.js
+Có 5 loại
+
+1. dev
+2. combined
+3. short
+4. tiny
+5. dev
+
+
+***** Helmet *****
+// Ngăn chặn thông tin riêng tư 
+// bảo mật các ứng dụng Express bằng cách đặt tiêu đề phản hồi HTTP.
+
+
+***** Compression *****
+// Nén dữ liệu 
