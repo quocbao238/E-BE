@@ -1,0 +1,4 @@
+@url
+
+### signUp
+POST http://localhost:3030/v1/api/shop/signup``
