@@ -1,12 +1,9 @@
 "use strict";
-const e = require("express");
 const { model, Schema, Types } = require("mongoose"); // Erase if already required
-
 const DOCUMENT_NAME = "Shop";
 const COLLECTION_NAME = "Shops";
-
 // Declare the Schema of the Mongo model
-var shopSchema = Schema(
+var shopSchema = new Schema(
   {
     name: {
       type: String,
@@ -25,7 +22,7 @@ var shopSchema = Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "inactive",
     },
     verify: {
       type: Schema.Types.Boolean,
@@ -43,4 +40,4 @@ var shopSchema = Schema(
 );
 
 //Export the model
-module.exports = mongoose.model("User", userSchema);
+module.exports = model(DOCUMENT_NAME, shopSchema);
