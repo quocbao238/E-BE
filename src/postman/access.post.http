@@ -1,4 +1,21 @@
-@url
+@url_dev=http://localhost:3030/v1/api
 
-### signUp
-POST http://localhost:3030/v1/api/shop/signup``
+### signup
+POST {{url_dev}}/shop/signup
+content-type: application/json
+x-api-key: 217d68143d52a3e126417f49c4d6f3d1534bedb09d27afefaf6b05b74698b59c23a24b2c11a755b4b946e25fa6328b0820350dd6e4984e0fdedb2a05676d8902
+
+{
+    "name": "Shop1",
+    "email": "shop2@gmail.com",
+    "password": "123456"
+}
+
+### login
+POST {{url_dev}}/shop/signup HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
