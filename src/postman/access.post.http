@@ -5,9 +5,9 @@ POST {{url_dev}}/shop/signup
 content-type: application/json
 x-api-key: 217d68143d52a3e126417f49c4d6f3d1534bedb09d27afefaf6b05b74698b59c23a24b2c11a755b4b946e25fa6328b0820350dd6e4984e0fdedb2a05676d8902
 
-{
+{ 
     "name": "Shop1",
-    "email": "shop2@gmail.com",
+    "email": "shop6@gmail.com",
     "password": "123456"
 }
 

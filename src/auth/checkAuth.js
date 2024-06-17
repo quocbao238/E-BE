@@ -37,9 +37,9 @@ const permission = (permission) => {
         message: "Permission denied 1",
       });
     }
-    console.log("permission", req.objectKey.permissions);
+    console.log("permission", req.objectKey.permissions, permission);
     const validPermission = req.objectKey.permissions.includes(permission);
-    if (validPermission) {
+    if (!validPermission) {
       return res.status(403).json({
         message: "Permission denied 2",
       });
@@ -49,7 +49,14 @@ const permission = (permission) => {
   };
 };
 
+const asyncHandler = (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+};
+
 module.exports = {
   apiKey,
   permission,
+  asyncHandler,
 };
