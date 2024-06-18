@@ -3,19 +3,40 @@
 ### signup
 POST {{url_dev}}/shop/signup
 content-type: application/json
-x-api-key: 217d68143d52a3e126417f49c4d6f3d1534bedb09d27afefaf6b05b74698b59c23a24b2c11a755b4b946e25fa6328b0820350dd6e4984e0fdedb2a05676d8902
+x-api-key: 72d7d72904708ec0fa145ccde5cc67a0e46b62e26017c669935e4650733f953eb8d4a07449d4d6f74ea251fa16be2bd23ad320c86fa824b24a594606acdb4bba
 
 { 
     "name": "Shop1",
-    "email": "shop6@gmail.com",
+    "email": "shop@gmail.com",
     "password": "123456"
 }
 
 ### login
-POST {{url_dev}}/shop/signup HTTP/1.1
+POST {{url_dev}}/shop/login
 content-type: application/json
+x-api-key: 72d7d72904708ec0fa145ccde5cc67a0e46b62e26017c669935e4650733f953eb8d4a07449d4d6f74ea251fa16be2bd23ad320c86fa824b24a594606acdb4bba
 
 {
-    "name": "sample",
-    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+    "email": "shop@gmail.com",
+    "password": "123456"
+}
+
+### logout
+POST {{url_dev}}/shop/logout
+content-type: application/json
+x-client-id: 6670fa8f2c908fa4ae6d2680
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjcwZmE4ZjJjOTA4ZmE0YWU2ZDI2ODAiLCJlbWFpbCI6InNob3BAZ21haWwuY29tIiwiaWF0IjoxNzE4NzAxOTg2LCJleHAiOjE3MTg4NzQ3ODZ9.8oC42rBtVMeDgWESrYKx8GXHSGsbi9MhZzk09aYdP1E
+x-api-key: 72d7d72904708ec0fa145ccde5cc67a0e46b62e26017c669935e4650733f953eb8d4a07449d4d6f74ea251fa16be2bd23ad320c86fa824b24a594606acdb4bba
+
+
+### refresh token
+POST {{url_dev}}/shop/refresh-token
+content-type: application/json
+x-client-id: 6670fa8f2c908fa4ae6d2680
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjcwZmE4ZjJjOTA4ZmE0YWU2ZDI2ODAiLCJlbWFpbCI6InNob3BAZ21haWwuY29tIiwiaWF0IjoxNzE4NzAxNjExLCJleHAiOjE3MTg4NzQ0MTF9.QQI5z7fOA3ukfMmfj-elEmgvwZjprZd1115AQEkbXrY
+x-api-key: 72d7d72904708ec0fa145ccde5cc67a0e46b62e26017c669935e4650733f953eb8d4a07449d4d6f74ea251fa16be2bd23ad320c86fa824b24a594606acdb4bba
+
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjcwZmE4ZjJjOTA4ZmE0YWU2ZDI2ODAiLCJlbWFpbCI6InNob3BAZ21haWwuY29tIiwiaWF0IjoxNzE4NzAxNjExLCJleHAiOjE3MTkzMDY0MTF9.QfaTz1gDZi2gHebwhzNdFFzas14qCcNc1cRsH2ywpxQ"
 }

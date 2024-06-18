@@ -2,11 +2,17 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
-const { createTokenPair } = require("../auth/authUtils");
+const { createTokenPair, verifyJWT } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
 const { BadRequestError } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
-const { find } = require("lodash");
+
+const {
+  AuthFailureError,
+  ForbiddenError,
+  NotFoundError,
+} = require("../core/error.response");
+
 const RoleShop = {
   SHOP: "shop",
   WRITER: "writer",
@@ -15,25 +21,52 @@ const RoleShop = {
 };
 
 class AccessService {
-  // ogin
+  // oginKeyTokenService
+  // Check email in dbs
+  // Match password
+  // Generate token pair [privateKey, publicKey]
+  // Genegrate tokens [accessToken, refreshToken]
+  // Get data user
   static login = async ({ email, password }) => {
     // Check email in dbs
-    // Match password
-    // Generate token pair [accessToken, refreshToken]
-    // Genegrate tokens
-    // Get data user
 
     const foundShop = await findByEmail(email);
+
+    console.log("foundShop", foundShop);
     if (!foundShop) {
       throw new BadRequestError("Shop not registered");
     }
+    // Match password
 
     const match = bcrypt.compare(password, foundShop.password);
     if (!match) {
-      throw new BadRequestError("Password is incorrect");
+      throw new AuthFailureError("Authentication error");
     }
+    // Generate token pair [privateKey, publicKey]
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
 
-    
+    // Genegrate tokens [accessToken, refreshToken]
+    const tokens = await createTokenPair(
+      { userId: foundShop._id, email },
+      publicKey,
+      privateKey
+    );
+
+    await KeyTokenService.createKeyToken({
+      userId: foundShop._id,
+      publicKey,
+      privateKey,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return {
+      shop: getInfoData({
+        fileds: ["_id", "name", "email"],
+        object: foundShop,
+      }),
+      tokens,
+    };
   };
 
   static signUp = async ({ name, email, password }) => {
@@ -89,6 +122,70 @@ class AccessService {
     return {
       code: 200,
       metadata: null,
+    };
+  };
+
+  static logout = async (keyStore) => {
+    const delKey = await KeyTokenService.removeKeyById(keyStore._id);
+    console.log("delKey", delKey);
+    return delKey;
+  };
+
+  // Call when accessToken is expired
+
+  static handleRefreshToken = async (refreshToken) => {
+    // check tokens is used
+    const tokenUsed = await KeyTokenService.findByRefreshTokenUsed(
+      refreshToken
+    );
+
+    console.log("BBBB 1", tokenUsed, refreshToken);
+
+    // if token is used, check who used it
+
+    if (tokenUsed) {
+      // refeshtoken create by payload & privaryKey
+      const { userId, email } = verifyJWT(refreshToken, tokenUsed.privateKey);
+      console.log(userId, email);
+      // remove key
+      await KeyTokenService.removeKeyByUserId(userId);
+      throw new ForbiddenError("Something went wrong. Please login again");
+    }
+
+    // If token is not used, check who hold it
+    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+
+    if (!holderToken) throw new AuthFailureError("Refresh token not found");
+
+    // verify refreshToken
+    const { userId, email } = verifyJWT(refreshToken, holderToken.privateKey);
+
+    console.log("BBBB", userId, email);
+
+    // generate new token pair
+    const foundShop = await findByEmail(email);
+    if (!foundShop) throw new AuthFailureError("Shop not registered");
+
+    // create token pair {accessToken, refreshToken} for user
+    const tokens = await createTokenPair(
+      { userId: foundShop._id, email },
+      holderToken.publicKey,
+      holderToken.privateKey
+    );
+
+    // update token to db
+    await holderToken.updateOne({
+      $set: {
+        refreshToken: tokens.refreshToken,
+      },
+      $addToSet: {
+        refreshTokenUsed: refreshToken, // add refreshToken use in this time
+      },
+    });
+
+    return {
+      user: { userId, email },
+      tokens,
     };
   };
 }

@@ -7,7 +7,7 @@ var keyTokenSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "Shop",
+      ref: "Shop", // Link with shop DOCUMENT_NAME
     },
     publicKey: {
       type: String,
@@ -17,9 +17,13 @@ var keyTokenSchema = new Schema(
       type: String,
       required: true,
     },
-    refreshToken: {
+    refreshTokenUsed: {
       type: Array,
       default: [],
+    },
+    refreshToken: {
+      type: String,
+      required: true,
     },
   },
   {
