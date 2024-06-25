@@ -132,7 +132,6 @@ class AccessService {
   };
 
   // Call when accessToken is expired
-
   static handleRefreshToken = async (refreshToken) => {
     // check tokens is used
     const tokenUsed = await KeyTokenService.findByRefreshTokenUsed(
@@ -185,6 +184,44 @@ class AccessService {
 
     return {
       user: { userId, email },
+      tokens,
+    };
+  };
+
+  // handle refresh v2
+  static handleRefreshTokenV2 = async ({ refreshToken, user, keyStore }) => {
+    // check tokens is used
+    if (keyStore.refreshTokenUsed.includes(refreshToken)) {
+      await KeyTokenService.removeKeyByUserId(userId);
+      throw new ForbiddenError("Something went wrong. Please login again");
+    }
+
+    if (keyStore.refreshToken !== refreshToken) {
+      throw new ForbiddenError("Refresh token not found");
+    }
+
+    const foundShop = await findByEmail(email);
+    if (!foundShop) throw new AuthFailureError("Shop not registered");
+
+    // create token pair {accessToken, refreshToken} for user
+    const tokens = await createTokenPair(
+      { userId: foundShop._id, email },
+      holderToken.publicKey,
+      holderToken.privateKey
+    );
+
+    // update token to db
+    await holderToken.updateOne({
+      $set: {
+        refreshToken: tokens.refreshToken,
+      },
+      $addToSet: {
+        refreshTokenUsed: refreshToken, // add refreshToken use in this time
+      },
+    });
+
+    return {
+      user,
       tokens,
     };
   };

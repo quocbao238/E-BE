@@ -35,7 +35,7 @@ class KeyTokenService {
   };
 
   static findByUserId = async (userId) => {
-    const key = await keytokenModel.findOne({ user: userId }).lean();
+    const key = await keytokenModel.findOne({ user: userId })
     console.log(`[P]::findByUserId::`, userId, key);
     return key;
   };
