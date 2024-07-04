@@ -64,6 +64,9 @@ var productSchema = new Schema(
   }
 )
 
+// create index for search
+productSchema.index({ product_name: 'text', product_description: 'text' })
+
 // Webhook Document middleware for slugify the product name
 productSchema.pre('save', function (next) {
   this.product_slug = slugify(this.product_name, { lower: true })

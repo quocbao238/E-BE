@@ -6,12 +6,23 @@ const router = express.Router()
 const asyncHandler = require('../../helpers/asyncHandler')
 const { authenticationV2 } = require('../../auth/authUtils')
 
+router.get(
+  '/search/:keySearch',
+  asyncHandler(ProductController.getListSearchProduct)
+)
+
 // authentication
 router.use(authenticationV2)
+
 router.post('', asyncHandler(ProductController.createProduct))
 router.post(
   '/publish/:id',
   asyncHandler(ProductController.publishProductByShop)
+)
+
+router.post(
+  '/unpublish/:id',
+  asyncHandler(ProductController.unPublishProductByShop)
 )
 
 //query

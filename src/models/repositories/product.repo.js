@@ -29,6 +29,23 @@ class ProductReposiroty {
     return await ProductReposiroty.getAllProducts({ query, limit, skip })
   }
 
+  static async searchProductByUser({ keySearch }) {
+    const regexSearch = new RegExp(keySearch)
+    const results = await product
+      .find(
+        {
+          isPublished: true,
+          $text: { $search: regexSearch },
+        },
+        {
+          score: { $meta: 'textScore' },
+        }
+      )
+      .sort({ score: { $meta: 'textScore' } })
+      .lean()
+    return results
+  }
+
   static async publishProductByShop({ product_shop, product_id }) {
     const foundShop = await product.findOne({
       product_shop: new Types.ObjectId(product_shop),
@@ -37,6 +54,18 @@ class ProductReposiroty {
     if (!foundShop) throw new Error('Product not found')
     foundShop.isDraft = false
     foundShop.isPublished = true
+    const { modifiedCount } = foundShop.save()
+    return modifiedCount
+  }
+
+  static async unPublishProductByShop({ product_shop, product_id }) {
+    const foundShop = await product.findOne({
+      product_shop: new Types.ObjectId(product_shop),
+      _id: new Types.ObjectId(product_id),
+    })
+    if (!foundShop) throw new Error('Product not found')
+    foundShop.isDraft = true
+    foundShop.isPublished = false
     const { modifiedCount } = foundShop.save()
     return modifiedCount
   }

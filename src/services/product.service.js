@@ -33,6 +33,13 @@ class ProductFactory {
     })
   }
 
+  static async unPublishProductByShop({ product_shop, product_id }) {
+    return await ProductReposiroty.unPublishProductByShop({
+      product_shop,
+      product_id,
+    })
+  }
+
   //********************** QUERY **********************//
   // find all draft products
   static async getAllDraftsProductForShop({
@@ -60,6 +67,10 @@ class ProductFactory {
       limit,
       skip,
     })
+  }
+
+  static async getListSearchProduct({ keySearch }) {
+    return await ProductReposiroty.searchProductByUser({ keySearch })
   }
 }
 
