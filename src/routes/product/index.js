@@ -8,10 +8,21 @@ const { authenticationV2 } = require('../../auth/authUtils')
 
 // authentication
 router.use(authenticationV2)
-
-console.log('product router')
-
 router.post('', asyncHandler(ProductController.createProduct))
+router.post(
+  '/publish/:id',
+  asyncHandler(ProductController.publishProductByShop)
+)
+
+//query
+router.get(
+  '/drafts/all',
+  asyncHandler(ProductController.getAllDraftsProductForShop)
+)
+router.get(
+  '/published/all',
+  asyncHandler(ProductController.getAllPublishedProductForShop)
+)
 
 // authentication
 

@@ -32,7 +32,6 @@ class AccessService {
 
     const foundShop = await findByEmail(email);
 
-    console.log("foundShop", foundShop);
     if (!foundShop) {
       throw new BadRequestError("Shop not registered");
     }
@@ -71,7 +70,6 @@ class AccessService {
 
   static signUp = async ({ name, email, password }) => {
     const holderShop = await shopModel.findOne({ email }).lean();
-    console.log("holderShop", holderShop);
     if (holderShop) {
       throw new BadRequestError("Shop already exists");
     }
@@ -127,7 +125,6 @@ class AccessService {
 
   static logout = async (keyStore) => {
     const delKey = await KeyTokenService.removeKeyById(keyStore._id);
-    console.log("delKey", delKey);
     return delKey;
   };
 
@@ -138,14 +135,11 @@ class AccessService {
       refreshToken
     );
 
-    console.log("BBBB 1", tokenUsed, refreshToken);
-
     // if token is used, check who used it
 
     if (tokenUsed) {
       // refeshtoken create by payload & privaryKey
       const { userId, email } = verifyJWT(refreshToken, tokenUsed.privateKey);
-      console.log(userId, email);
       // remove key
       await KeyTokenService.removeKeyByUserId(userId);
       throw new ForbiddenError("Something went wrong. Please login again");
@@ -159,7 +153,6 @@ class AccessService {
     // verify refreshToken
     const { userId, email } = verifyJWT(refreshToken, holderToken.privateKey);
 
-    console.log("BBBB", userId, email);
 
     // generate new token pair
     const foundShop = await findByEmail(email);

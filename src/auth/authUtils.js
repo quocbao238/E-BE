@@ -54,8 +54,6 @@ const authenticationV2 = asyncHandler(async (req, res, next) => {
       req.keyStore = keyStore
       req.user = decodeUser
       req.refreshToken = refreshToken
-
-      console.log('Baooooo', req.user)
       return next()
     } catch (error) {
       console.log('error', error)
@@ -70,7 +68,6 @@ const authenticationV2 = asyncHandler(async (req, res, next) => {
   try {
     const decodeUser = jwt.verify(accessToken, keyStore.publicKey)
 
-    console.log('step3', decodeUser)
     if (userId !== decodeUser.userId)
       throw new AuthFailureError('Invalid UserId')
     req.keyStore = keyStore
@@ -92,13 +89,11 @@ const authentication = asyncHandler(async (req, res, next) => {
   // Return next() if all is ok
   const headers = req.headers
 
-  console.log('step0', headers)
   const userId = headers[HEADER.CLIENT_ID]?.toString()
   if (!userId) throw new AuthFailureError('Invalid request')
 
   const keyStore = await KeyTokenService.findByUserId(userId)
   if (!keyStore) throw new NotFoundError('Invalid request - KeyStore not found')
-  console.log('step1', keyStore)
 
   const accessToken = req.headers[HEADER.AUTHORIZATION]
   if (!accessToken) throw new AuthFailureError('Invalid request')
@@ -106,7 +101,6 @@ const authentication = asyncHandler(async (req, res, next) => {
   try {
     const decodeUser = jwt.verify(accessToken, keyStore.publicKey)
 
-    console.log('step3', decodeUser)
     if (userId !== decodeUser.userId)
       throw new AuthFailureError('Invalid UserId')
 
