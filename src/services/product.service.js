@@ -11,6 +11,7 @@ const {
 } = require('../models/product.model')
 const ProductReposiroty = require('../models/repositories/product.repo')
 const { BadRequestError, ForbiddenError } = require('../core/error.response')
+const { getSelectData } = require('../utils')
 
 class ProductFactory {
   static productRegistry = {}
@@ -71,6 +72,34 @@ class ProductFactory {
 
   static async getListSearchProduct({ keySearch }) {
     return await ProductReposiroty.searchProductByUser({ keySearch })
+  }
+
+  static async getProducts({
+    limit = 50,
+    sort = 'ctime',
+    page = 1,
+    filter = { isPublished: true },
+  }) {
+    // ctime is sort by newest created time
+    return await ProductReposiroty.getProducts({
+      limit,
+      sort,
+      page,
+      filter,
+      select: [
+        'product_name',
+        'product_thumb',
+        'product_price',
+        'product_type',
+      ],
+    })
+  }
+
+  static getProduct = async ({ product_id }) => {
+    return await ProductReposiroty.getProductById({
+      product_id,
+      unSelect: ['__v'],
+    })
   }
 }
 
