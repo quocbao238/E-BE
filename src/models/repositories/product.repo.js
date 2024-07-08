@@ -89,6 +89,25 @@ class ProductReposiroty {
     const { modifiedCount } = foundShop.save()
     return modifiedCount
   }
+
+  static async updateProductById({
+    productId,
+    bodyUpdate,
+    model,
+    isNew = true,
+  }) {
+    console.log(
+      'ProductReposiroty updateProductById',
+      productId,
+      bodyUpdate,
+      model,
+      isNew
+    )
+
+    return await model.findByIdAndUpdate(productId, bodyUpdate, {
+      new: isNew,
+    })
+  }
 }
 
 module.exports = ProductReposiroty

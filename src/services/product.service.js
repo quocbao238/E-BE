@@ -11,7 +11,7 @@ const {
 } = require('../models/product.model')
 const ProductReposiroty = require('../models/repositories/product.repo')
 const { BadRequestError, ForbiddenError } = require('../core/error.response')
-const { getSelectData } = require('../utils')
+const { removeUndefined } = require('../utils')
 
 class ProductFactory {
   static productRegistry = {}
@@ -23,6 +23,12 @@ class ProductFactory {
     const ProductClass = ProductFactory.productRegistry[type]
     if (!ProductClass) throw new BadRequestError(`Invalid product type ${type}`)
     return new ProductClass(payload).createProduct()
+  }
+
+  static async updateProduct(type, productId, payload) {
+    const ProductClass = ProductFactory.productRegistry[type]
+    if (!ProductClass) throw new BadRequestError(`Invalid product type ${type}`)
+    return new ProductClass(payload).updateProduct(productId)
   }
 
   //********************** PUT **********************//
@@ -132,6 +138,13 @@ class Product {
       _id: product_id,
     })
   }
+  async updateProduct(productId, bodyUpdate) {
+    return await ProductReposiroty.updateProductById({
+      productId,
+      bodyUpdate,
+      model: product,
+    })
+  }
 }
 
 // Define sub classes for each product type
@@ -152,6 +165,26 @@ class Clothing extends Product {
       throw new BadRequestError('Creating product failed')
     }
     return newProduct
+  }
+
+  async updateProduct(productId) {
+    console.log(`[1]::`, this)
+    const objectParams = removeUndefinedNull(this)
+    console.log(`[2]::`, objectParams)
+    if (objectParams.product_attributes) {
+      // update child
+      await ProductReposiroty.updateProductById({
+        productId,
+        bodyUpdate: updateNestedObject(objectParams.product_attributes),
+        model: clothing,
+      })
+    }
+
+    const updateProduct = await super.updateProduct(
+      productId,
+      updateNestedObject(objectParams)
+    )
+    return updateProduct
   }
 }
 
