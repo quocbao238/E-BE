@@ -1,6 +1,11 @@
 'use strict'
 
 const _ = require('lodash')
+const { Types } = require('mongoose')
+
+const convertToObjectIdMongodb = (id) => {
+  return new Types.ObjectId(id)
+}
 
 const getInfoData = ({ fileds = [], object = {} }) => {
   return _.pick(object, fileds)
@@ -34,12 +39,21 @@ const removeUndefinedNull = (obj) => {
   )
     
  */
-const updateNestedObject = (object, path, value) => {
-  const keys = path.split('.')
-  const lastKey = keys.pop()
-  const lastObj = keys.reduce((obj, key) => (obj[key] = obj[key] || {}), object)
-  lastObj[lastKey] = value
-  return object
+
+// support nested object
+const updateNestedObjectParser = (obj) => {
+  const newObj = {}
+  Object.keys(obj).forEach((key) => {
+    if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+      const nestedObj = updateNestedObjectParser(obj[key])
+      Object.keys(nestedObj).forEach((nestedKey) => {
+        newObj[`${key}.${nestedKey}`] = nestedObj[nestedKey]
+      })
+    } else {
+      newObj[key] = obj[key]
+    }
+  })
+  return newObj
 }
 
 module.exports = {
@@ -47,5 +61,6 @@ module.exports = {
   getSelectData,
   unGetSelectData,
   removeUndefinedNull,
-  updateNestedObject,
+  updateNestedObjectParser,
+  convertToObjectIdMongodb,
 }

@@ -68,8 +68,8 @@ class ProductReposiroty {
   // post
   static async publishProductByShop({ product_shop, product_id }) {
     const foundShop = await product.findOne({
-      product_shop: Types.ObjectId(product_shop),
-      _id: Types.ObjectId(product_id),
+      product_shop: new Types.ObjectId(product_shop),
+      _id: new Types.ObjectId(product_id),
     })
     if (!foundShop) throw new Error('Product not found')
     foundShop.isDraft = false

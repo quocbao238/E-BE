@@ -10,8 +10,9 @@ const {
   DOCUMENT_NAME_FURNITURE,
 } = require('../models/product.model')
 const ProductReposiroty = require('../models/repositories/product.repo')
-const { BadRequestError, ForbiddenError } = require('../core/error.response')
-const { removeUndefined } = require('../utils')
+const { BadRequestError } = require('../core/error.response')
+const { removeUndefinedNull, updateNestedObjectParser } = require('../utils')
+const InventoryRepo = require('../models/repositories/inventory.repo')
 
 class ProductFactory {
   static productRegistry = {}
@@ -133,10 +134,20 @@ class Product {
 
   async createProduct({ product_id }) {
     // use id of the sub class to set id of the product
-    return await product.create({
+    const newProduct = await product.create({
       ...this,
       _id: product_id,
     })
+    console.log(`[1]::`, product)
+    if (newProduct) {
+      // add product_stock to inventory collection
+      await InventoryRepo.insert({
+        productId: newProduct._id,
+        shopId: this.product_shop,
+        stock: this.product_quantity,
+      })
+    }
+    return newProduct
   }
   async updateProduct(productId, bodyUpdate) {
     return await ProductReposiroty.updateProductById({
@@ -175,14 +186,14 @@ class Clothing extends Product {
       // update child
       await ProductReposiroty.updateProductById({
         productId,
-        bodyUpdate: updateNestedObject(objectParams.product_attributes),
+        bodyUpdate: updateNestedObjectParser(objectParams.product_attributes),
         model: clothing,
       })
     }
 
     const updateProduct = await super.updateProduct(
       productId,
-      updateNestedObject(objectParams)
+      updateNestedObjectParser(objectParams)
     )
     return updateProduct
   }
