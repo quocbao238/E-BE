@@ -6,7 +6,11 @@ const {
   furniture,
   clothing,
 } = require('../../models/product.model')
-const { getSelectData, unGetSelectData } = require('../../utils')
+const {
+  getSelectData,
+  unGetSelectData,
+  convertToObjectIdMongodb,
+} = require('../../utils')
 const { Types } = require('mongoose')
 
 class ProductReposiroty {
@@ -107,6 +111,28 @@ class ProductReposiroty {
     return await model.findByIdAndUpdate(productId, bodyUpdate, {
       new: isNew,
     })
+  }
+
+  // check pricing of products is available in server
+  static async checkProductAvailableInServer(products) {
+    const result = await Promise.all(
+      products.map(async (product) => {
+        console.log('product', product)
+        const foundProduct = await ProductReposiroty.getProductById({
+          product_id: convertToObjectIdMongodb(product.productId),
+          unSelect: ['__v'],
+        })
+        console.log('foundProduct', foundProduct)
+        if (foundProduct) {
+          return {
+            price: foundProduct.product_price,
+            quantity: product.quantity,
+            productId: product.productId,
+          }
+        }
+      })
+    )
+    return result
   }
 }
 

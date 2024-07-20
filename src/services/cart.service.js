@@ -1,7 +1,6 @@
 const cartSchema = require('../models/cart.model')
 const { BadRequestError, NotFoundError } = require('../core/error.response')
 const ProductReposiroty = require('../models/repositories/product.repo')
-const { convertToObject } = require('typescript')
 const { convertToObjectIdMongodb } = require('../utils')
 
 /*
@@ -64,7 +63,10 @@ class CartService {
       return cart
     }
     // If cart exists -> check if product in cart is empty
-    if (useCart.cart_products.length === 0) {
+    if (
+      useCart.cart_products.length === 0 ||
+      !useCart.cart_products.find((p) => p.productId === product.productId)
+    ) {
       useCart.cart_products.push(product)
       return await useCart.save()
     }

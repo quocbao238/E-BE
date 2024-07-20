@@ -149,6 +149,7 @@ class DisscountService {
 
   // Applies discount to the order
   static async getDiscountAmount({ codeId, userId, shopId, products }) {
+    console.log('getDiscountAmount', codeId, userId, shopId, products)
     const foundDiscount = await DiscountReposiroty.checkDiscountExist({
       model: discountModel,
       filter: {
@@ -183,7 +184,7 @@ class DisscountService {
 
     if (discount_min_order_value > 0) {
       totalOrderValue = products.reduce((acc, product) => {
-        return acc + product.product_price * product.product_quantity
+        return acc + product.price * product.quantity
       }, 0)
 
       if (totalOrderValue < discount_min_order_value)
