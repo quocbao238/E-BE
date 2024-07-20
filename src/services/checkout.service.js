@@ -5,6 +5,7 @@ const { BadRequestError, NotFoundError } = require('../core/error.response')
 const CartRepository = require('../models/repositories/cart.repo')
 const ProductReposiroty = require('../models/repositories/product.repo')
 const DiscountService = require('./discount.service')
+const orderModel = require('../models/order.model')
 
 class CheckoutService {
   /*
@@ -137,10 +138,33 @@ class CheckoutService {
       throw new BadRequestError('Product is sold out. Please try again')
     }
 
-    //TODO: Later we will implement the payment gateway
-    // const newOrder = await createOder()
-    // return newOrder
+    const newOrder = await orderModel.create({
+      order_userId: userId,
+      order_checkout: checkout_order,
+      order_shipping: user_address,
+      order_payment: user_payment,
+      order_products: shop_order_ids_news,
+    })
+
+    // if insert done, remove product in cart
+    if (newOrder) {
+      await cartSchema.findByIdAndDelete(cartId)
+    }
+
+    return newOrder
   }
+
+  //query orders [Users]
+  static async getOrdersByUser({ userId, limit, page }) {}
+
+  // query one order [Users]
+  static async getOrderById({ userId, orderId }) {}
+
+  // cancel order [Users]
+  static async cancelOrder({ userId, orderId }) {}
+
+  // update Order Status [Shop, Admin]
+  static async updateOrderStatus({ orderId, status }) {}
 }
 
 module.exports = CheckoutService
