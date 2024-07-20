@@ -98,6 +98,7 @@ class ProductFactory {
         'product_thumb',
         'product_price',
         'product_type',
+        'product_shop',
       ],
     })
   }
