@@ -60,8 +60,6 @@ class CheckoutService {
       if (!checkProductInServer[0])
         throw new BadRequestError('Product not found in server')
 
-      console.log('checkProductInServer', checkProductInServer)
-
       // total price of all products
       const checkoutPrice = checkProductInServer.reduce((acc, product) => {
         return acc + product.price * product.quantity
@@ -103,6 +101,45 @@ class CheckoutService {
     }
 
     return { checkout_order, shop_order_ids, shop_order_ids_new }
+  }
+
+  // order
+
+  static async orderByUser({
+    shop_order_ids,
+    cartId,
+    userId,
+    user_address = {},
+    user_payment = {},
+  }) {
+    const { shop_order_ids_news, checkout_order } = await this.checkoutReview({
+      cartId,
+      userId,
+      shop_order_ids,
+    })
+
+    // check again to make sure stock is available
+    const products = shop_order_ids_news.flatMap((item) => item.item_products)
+    console.log(`[1] products`, products)
+    const acquiredProdct = []
+
+    for (const product of products) {
+      const { productId, quantity } = product
+      const keyLock = await acquireLock(productId, quantity, cartId)
+      acquiredProdct.push(keyLock ? true : false)
+      if (keyLock) {
+        await releaseLock(keyLock)
+      }
+    }
+
+    // check if one of the product is sold out
+    if (acquiredProdct.includes(false)) {
+      throw new BadRequestError('Product is sold out. Please try again')
+    }
+
+    //TODO: Later we will implement the payment gateway
+    // const newOrder = await createOder()
+    // return newOrder
   }
 }
 
