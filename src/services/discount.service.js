@@ -3,9 +3,7 @@ const { BadRequestError } = require('../core/error.response')
 const discountModel = require('../models/discount.model')
 const { convertToObjectIdMongodb } = require('../utils')
 const ProductRepository = require('../models/repositories/product.repo')
-const {
-  default: DiscountRepo,
-} = require('../models/repositories/discount.repo')
+const DiscountReposiroty = require('../models/repositories/discount.repo')
 
 /* Discount Service
 1. Generate discount code [Shop, Admin]
@@ -43,7 +41,6 @@ class DisscountService {
       discount_product_ids,
       discount_shopId,
       discount_apply_to,
-      
     } = payload
 
     // Validate discount_start_date and discount_end_date
@@ -124,25 +121,27 @@ class DisscountService {
         limit: +limit,
         page: +page,
         filter: {
-          product_shop: { $in: discount_product_ids },
+          _id: { $in: discount_product_ids },
           isPublished: true,
         },
         sort: 'ctime',
         select: ['product_name'],
       })
+
+      console.log('product', product)
     }
     return product
   }
 
   static async getAllDiscountsByShop({ limit, page, shopId }) {
-    const discounts = await DiscountRepo.findAllDiscountCodesUnSelect({
+    const discounts = await DiscountReposiroty.findAllDiscountCodesSelect({
       limit: +limit,
       page: +page,
       filter: {
         discount_shopId: convertToObjectIdMongodb(shopId),
         discount_is_active: true,
       },
-      unSelect: ['__v', 'discount_shopId'],
+      select: ['discount_name', 'discount_shopId'],
       model: discountModel,
     })
     return discounts
@@ -150,7 +149,7 @@ class DisscountService {
 
   // Applies discount to the order
   static async getDiscountAmount({ codeId, userId, shopId, products }) {
-    const foundDiscount = DiscountRepo.checkDiscountExist({
+    const foundDiscount = await DiscountReposiroty.checkDiscountExist({
       model: discountModel,
       filter: {
         discount_code: codeId,
@@ -160,11 +159,18 @@ class DisscountService {
 
     if (!foundDiscount) throw new BadRequestError('Discount not found')
 
-    const { discount_is_active, discount_max_uses, discount_min_order_value } =
-      foundDiscount
+    const {
+      discount_is_active,
+      discount_max_uses,
+      discount_min_order_value,
+      discount_max_uses_per_user,
+      discount_type,
+      discount_value,
+    } = foundDiscount
 
     // validate discount code
     if (!discount_is_active) throw new BadRequestError('Discount has expired')
+
     if (discount_max_uses <= 0)
       throw new BadRequestError('Discount are out of uses')
     if (
@@ -174,6 +180,7 @@ class DisscountService {
       throw new BadRequestError('Discount code has expired')
 
     let totalOrderValue
+
     if (discount_min_order_value > 0) {
       totalOrderValue = products.reduce((acc, product) => {
         return acc + product.product_price * product.product_quantity
@@ -213,7 +220,7 @@ class DisscountService {
   }
 
   static async cancelDiscountCode({ codeId, shopId, userId }) {
-    const found = await DiscountRepo.checkDiscountExist({
+    const found = await DiscountReposiroty.checkDiscountExist({
       model: discountModel,
       filter: {
         discount_code: codeId,

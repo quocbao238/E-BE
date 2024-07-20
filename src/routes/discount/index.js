@@ -16,6 +16,6 @@ router.get(
 router.use(authenticationV2)
 
 router.post('', asyncHandler(DiscountController.createDiscount))
-router.get('', asyncHandler(DiscountController.getAllDiscountCodes))
+router.get('', asyncHandler(DiscountController.getAllDiscountCodeByShop))
 
 module.exports = router
